@@ -7,14 +7,27 @@ class Header extends Component {
       <nav className="pt-navbar">
         <div className="pt-navbar-group pt-align-left">
           <div className="pt-navbar-heading">Chord Creator</div>
-          <input className="pt-input" placeholder="Search Songs..." />
+          {
+            this.props.authenticated ?
+            <input className="pt-input" placeholder="Search Songs..." /> :
+            null
+          }
         </div>
-        <div className="pt-navbar-group pt-align-right">
-          <Link className="pt-button pt-minimal pt-icon-music" to="/songs">Song</Link>
-          <span className="pt-navbar-driver"></span>
-          <button className="pt-button pt-minimal pt-icon-user"></button>
-          <button className="pt-button pt-minimal pt-icon-cog"></button>
-        </div>
+        { this.props.authenticated ?
+          (
+            <div className="pt-navbar-group pt-align-right">
+              <Link className="pt-button pt-minimal pt-icon-music" to="/songs">Song</Link>
+              <span className="pt-navbar-driver"></span>
+              <button className="pt-button pt-minimal pt-icon-user"></button>
+              <Link className="pt-button pt-minimal pt-icon-log-out" to="/logout" aria-label="Log out"></Link>
+            </div>
+          ) :
+          (
+            <div className="pt-navbar-group pt-align-right">
+              <Link className="pt-button pt-intent-primary" to="/login">Register/Login</Link>
+            </div>
+          )
+        }
       </nav>
     );
   }
