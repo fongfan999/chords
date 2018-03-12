@@ -100,7 +100,7 @@ class App extends Component {
       <div style={{maxWidth: "1160px", margin: "0 auto"}}>
         <BrowserRouter>
           <div>
-            <Header authenticated={this.state.authenticated} />
+            <Header addSong={this.addSong} authenticated={this.state.authenticated} />
             <div className="main-content" style={{padding: "1em"}}>
               <div className="workspace">
                 <Route exact path="/login" render={(props) => {
