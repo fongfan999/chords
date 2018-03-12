@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { BrowserRouter, Route  } from 'react-router-dom';
+import { BrowserRouter, Route, Redirect } from 'react-router-dom';
 import { Spinner } from '@blueprintjs/core';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -9,12 +9,24 @@ import ChordEditor from './components/ChordEditor';
 import SongList from './components/SongList';
 import { app, base } from './base';
 
+function AuthenticatedRoute({component: Component, authenticated, ...rest}) {
+  return (
+    <Route
+      {...rest}
+      render={(props) => authenticated === true
+          ? <Component {...props} {...rest} />
+          : <Redirect to={{pathname: '/login', state: { from: props.location }}}/> } />
+  )
+}
+
 class App extends Component {
   constructor() {
     super();
+    this.setCurrentUser = this.setCurrentUser.bind(this);
     this.addSong = this.addSong.bind(this);
     this.updateSong = this.updateSong.bind(this);
     this.state = {
+      currentUser: null,
       songs: { },
       authenticated: false,
       loading: true
@@ -38,6 +50,22 @@ class App extends Component {
     songs[song.id] = song
 
     this.setState({songs});
+  }
+
+  setCurrentUser(user) {
+    if (user) {
+      this.setState({
+        currentUser: user,
+        authenticated: true,
+        loading: false
+      })
+    } else {
+      this.setState({
+        currentUser: null,
+        authenticated: false,
+        loading: false
+      })
+    }
   }
 
   componentWillMount() {
@@ -75,13 +103,16 @@ class App extends Component {
             <Header authenticated={this.state.authenticated} />
             <div className="main-content" style={{padding: "1em"}}>
               <div className="workspace">
-                <Route exact path="/login" component={Login} />
-                <Route exact path="/logout" component={Logout} />
-                <Route exact path="/songs" render={(props) => {
-                  return (
-                    <SongList songs={this.state.songs} />
-                  )
+                <Route exact path="/login" render={(props) => {
+                  return <Login setCurrentUser={this.setCurrentUser} {...props} />
                 }} />
+                <Route exact path="/logout" component={Logout} />
+                <AuthenticatedRoute
+                  exact
+                  path="/songs"
+                  authenticated={this.state.authenticated}
+                  component={SongList}
+                  songs={this.state.songs} />
                 <Route path="/songs/:songId" render={(props) => {
                   const song = this.state.songs[props.match.params.songId];
                   return (
