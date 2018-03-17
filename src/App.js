@@ -39,7 +39,8 @@ class App extends Component {
     songs[id] = {
       id: id,
       title: title,
-      chordpro: ''
+      chordpro: '',
+      owner: this.state.currentUser.uid
     }
 
     this.setState({songs});
@@ -56,28 +57,38 @@ class App extends Component {
     if (user) {
       this.setState({
         currentUser: user,
-        authenticated: true,
-        loading: false
+        authenticated: true
       })
     } else {
       this.setState({
         currentUser: null,
-        authenticated: false,
-        loading: false
+        authenticated: false
       })
     }
   }
 
   componentWillMount() {
     this.removeAuthListener = app.auth().onAuthStateChanged((user) => {
-      this.setState({
-        authenticated: !!user,
-        loading: false
-      })
-    });
-    this.songsRef = base.syncState('songs', {
-      context: this,
-      state: 'songs'
+      if (user) {
+        this.setState({
+          currentUser: user,
+          authenticated: true,
+          loading: false
+        })
+
+        this.songsRef = base.syncState(`songs/${user.uid}`, {
+          context: this,
+          state: 'songs'
+        });
+      } else {
+        this.setState({
+          currentUser: null,
+          authenticated: false,
+          loading: false
+        })
+
+        base.removeBinding(this.songsRef);
+      }
     });
   }
 
